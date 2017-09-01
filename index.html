@@ -1,0 +1,143 @@
+<html>
+<head>
+<title>Counters</title>
+<style>
+html { 
+    font-family: sans-serif; 
+}
+
+#countersContainer {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.counter-container {
+    padding: 25px;
+}
+
+.counter-name { 
+    text-align: center;
+    font-size: 20pt; 
+}
+
+.counter-display { 
+    font-size: 32pt; 
+}
+input.counter-display { 
+    width: 2em; 
+    text-align: center;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    border-top: 1px black solid;
+    border-bottom: 1px black solid;
+    border-left: 1px black dashed;
+    border-right: 1px black dashed;
+}
+button.counter-display {
+    width: 1.5em;
+    background: white;
+    margin: 0;
+    padding: 0;
+}
+
+.decrement-button {
+    border-radius: 10px 0px 0px 10px;
+    border: 1px black solid;
+    border-right: 0;
+}
+
+.increment-button {
+    border-radius: 0px 10px 10px 0px;
+    border: 1px black solid;
+    border-left: 0;
+}
+
+#addCounter {
+    border-radius: 10px 10px 10px 10px;
+    border: 1px black solid;
+    text-align: center;
+    font-size: 32pt; 
+    width: 4.5em;
+    background: white;
+    margin: 25px;
+}
+
+</style>
+<script>
+function getCounterName() {
+    const names = ["whales", "buttons", "things", "teeth", "pens", "dimes", "life", "tokens", "pods", "washing machines", "rainbows", "locks", "screens", "devices", "Fridays", "guesses", "glasses", "clouds", "slices", "attempts"];
+    const idx = Math.floor(Math.random() * names.length);
+    return names[idx];
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const countersContainer = document.getElementById("countersContainer");
+
+    function addCounterAction() {
+        const counterContainer = document.createElement("span");
+        counterContainer.classList.add("counter-container");
+
+        const counterName = document.createElement("div");
+        counterName.classList.add("counter-name");
+        counterName.setAttribute("contenteditable", "true");
+        counterName.textContent = getCounterName();
+        counterContainer.appendChild(counterName);
+
+        const historyContainer = document.createElement("div");
+        const historyName = document.createElement("span");
+        historyName.textContent = "History (+): ";
+
+        const historyValue = document.createElement("span");
+        historyValue.textContent = "0";
+        historyValue.setAttribute("contenteditable", "true");
+
+        historyName.addEventListener("click", () => {
+            historyValue.textContent += ", " + (parseInt(counterInput.value) || 0);
+        });
+        historyContainer.appendChild(historyName);
+        historyContainer.appendChild(historyValue);
+
+        counterContainer.appendChild(historyContainer);
+
+        const counterInput = document.createElement("input");
+        counterInput.value = "0";
+        counterInput.type = "number";
+        counterInput.classList.add("counter-display");
+
+        const decrementButton = document.createElement("button");
+        decrementButton.textContent = "-";
+        decrementButton.classList.add("counter-display");
+        decrementButton.classList.add("decrement-button");
+        decrementButton.addEventListener("click", () => {
+            counterInput.value = (parseInt(counterInput.value) || 0) - 1;
+        });
+        counterContainer.appendChild(decrementButton);
+        counterContainer.appendChild(counterInput);
+
+        const incrementButton = document.createElement("button");
+        incrementButton.textContent = "+";
+        incrementButton.classList.add("counter-display");
+        incrementButton.classList.add("increment-button");
+        incrementButton.addEventListener("click", () => {
+            counterInput.value = (parseInt(counterInput.value) || 0) + 1;
+        });
+        counterContainer.appendChild(incrementButton);
+
+        countersContainer.insertBefore(counterContainer, document.getElementById("addCounter"));
+
+        counterName.focus();
+    }
+    addCounterAction();
+    document.getElementById("addCounter").addEventListener("click", addCounterAction);
+});
+</script>
+</head>
+<body>
+<h1>Counters</h1>
+<div id="countersContainer">
+
+<button id="addCounter">+</button>
+</div>
+</body>
+</html>
