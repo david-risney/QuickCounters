@@ -132,7 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
         counterName.focus();
     }
     addCounterAction("❤");
-    document.getElementById("addCounter").addEventListener("click", addCounterAction);
+    document.getElementById("addCounter").addEventListener("click", () => {
+        addCounterAction(getCounterName());
+    });
 });
 </script>
 </head>
