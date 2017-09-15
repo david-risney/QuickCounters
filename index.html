@@ -77,14 +77,14 @@ function getCounterName() {
 document.addEventListener("DOMContentLoaded", () => {
     const countersContainer = document.getElementById("countersContainer");
 
-    function addCounterAction() {
+    function addCounterAction(name) {
         const counterContainer = document.createElement("span");
         counterContainer.classList.add("counter-container");
 
         const counterName = document.createElement("div");
         counterName.classList.add("counter-name");
         counterName.setAttribute("contenteditable", "true");
-        counterName.textContent = getCounterName();
+        counterName.textContent = name || getCounterName();
         counterContainer.appendChild(counterName);
 
         const historyContainer = document.createElement("div");
@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         counterName.focus();
     }
-    addCounterAction();
+    addCounterAction("❤");
     document.getElementById("addCounter").addEventListener("click", addCounterAction);
 });
 </script>
