@@ -68,74 +68,121 @@ button.counter-display {
 
 </style>
 <script>
-function getCounterName() {
-    const names = ["❤", "😊", "🤷", "😈", "🤢", "☠", "👻", "👽", "💩", "🧛‍♂️", "🧟‍♀️", "🧙‍♂️", "🕴", "🏆", "☀", "🕓", "🐱‍👤"];
-    const idx = Math.floor(Math.random() * names.length);
-    return names[idx];
-}
+(() => {
+    let model = (() => {
+        function getCounterName() {
+            const names = ["❤", "😊", "🤷", "😈", "🤢", "☠", "👻", "👽", "💩", "🧛‍♂️", "🧟‍♀️", "🧙‍♂️", "🕴", "🏆", "☀", "🕓", "🐱‍👤"];
+            const idx = Math.floor(Math.random() * names.length);
+            return names[idx];
+        }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const countersContainer = document.getElementById("countersContainer");
+        let store = [];
+        let result = {};
 
-    function addCounterAction(name) {
-        const counterContainer = document.createElement("span");
-        counterContainer.classList.add("counter-container");
+        result.add = (name, value) => {
+            const entry = {
+                name: name || getCounterName(),
+                idx: store.length,
+                value: value || 0,
+                removed: false
+            };
+            store.push(entry);
+            result.save();
+            return entry;
+        };
 
-        const counterName = document.createElement("div");
-        counterName.classList.add("counter-name");
-        counterName.setAttribute("contenteditable", "true");
-        counterName.textContent = name || getCounterName();
-        counterContainer.appendChild(counterName);
+        result.save = () => {
+            window.localStorage["save"] = JSON.stringify(store);
+        };
 
-        const historyContainer = document.createElement("div");
-        const historyName = document.createElement("span");
-        historyName.textContent = "History (+): ";
+        result.load = (callback) => {
+            let localStore = [{
+                name: "❤",
+                idx: 0,
+                value: 20,
+                removed: false
+            }];
+            if (window.localStorage && window.localStorage["save"]) {
+                try {
+                    localStore = JSON.parse(window.localStorage["save"]);
+                }
+                catch (error) {
+                }
+            }
 
-        const historyValue = document.createElement("span");
-        historyValue.textContent = "0";
-        historyValue.setAttribute("contenteditable", "true");
+            localStore.filter(entry => !entry.removed).forEach(entry => {
+                callback(entry.name, entry.value);
+            });
+        };
 
-        historyName.addEventListener("click", () => {
-            historyValue.textContent += ", " + (parseInt(counterInput.value) || 0);
+        return result;
+    })();
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const countersContainer = document.getElementById("countersContainer");
+
+        function addCounterAction(name, value) {
+            const counterContainer = document.createElement("span");
+            counterContainer.classList.add("counter-container");
+            const entry = model.add(name, value);
+            counterContainer.setAttribute("data-entry-idx", entry.idx);
+
+            const counterName = document.createElement("div");
+            counterName.classList.add("counter-name");
+            counterName.setAttribute("contenteditable", "true");
+            counterName.textContent = entry.name;
+            counterName.addEventListener("blur", () => {
+                if (counterName.textContent === "") {
+                    entry.removed = true;
+                    counterContainer.parentElement.removeChild(counterContainer);
+                }
+                entry.name = counterName.textContent;
+                model.save();
+            });
+            counterContainer.appendChild(counterName);
+
+            const counterInput = document.createElement("input");
+            counterInput.value = value || "0";
+            counterInput.type = "number";
+            counterInput.classList.add("counter-display");
+            counterInput.addEventListener("blur", () => {
+                entry.value = parseInt(counterInput.value);
+                model.save();
+            });
+
+            const decrementButton = document.createElement("button");
+            decrementButton.textContent = "-";
+            decrementButton.classList.add("counter-display");
+            decrementButton.classList.add("decrement-button");
+            decrementButton.addEventListener("click", () => {
+                counterInput.value = entry.value = (parseInt(counterInput.value) || 0) - 1;
+                model.save();
+            });
+            counterContainer.appendChild(decrementButton);
+            counterContainer.appendChild(counterInput);
+
+            const incrementButton = document.createElement("button");
+            incrementButton.textContent = "+";
+            incrementButton.classList.add("counter-display");
+            incrementButton.classList.add("increment-button");
+            incrementButton.addEventListener("click", () => {
+                counterInput.value = entry.value = (parseInt(counterInput.value) || 0) + 1;
+                model.save();
+            });
+            counterContainer.appendChild(incrementButton);
+
+            countersContainer.insertBefore(counterContainer, document.getElementById("addCounter"));
+
+            counterName.focus();
+        }
+
+        document.getElementById("addCounter").addEventListener("click", () => {
+            addCounterAction();
         });
-        historyContainer.appendChild(historyName);
-        historyContainer.appendChild(historyValue);
 
-        counterContainer.appendChild(historyContainer);
-
-        const counterInput = document.createElement("input");
-        counterInput.value = "0";
-        counterInput.type = "number";
-        counterInput.classList.add("counter-display");
-
-        const decrementButton = document.createElement("button");
-        decrementButton.textContent = "-";
-        decrementButton.classList.add("counter-display");
-        decrementButton.classList.add("decrement-button");
-        decrementButton.addEventListener("click", () => {
-            counterInput.value = (parseInt(counterInput.value) || 0) - 1;
-        });
-        counterContainer.appendChild(decrementButton);
-        counterContainer.appendChild(counterInput);
-
-        const incrementButton = document.createElement("button");
-        incrementButton.textContent = "+";
-        incrementButton.classList.add("counter-display");
-        incrementButton.classList.add("increment-button");
-        incrementButton.addEventListener("click", () => {
-            counterInput.value = (parseInt(counterInput.value) || 0) + 1;
-        });
-        counterContainer.appendChild(incrementButton);
-
-        countersContainer.insertBefore(counterContainer, document.getElementById("addCounter"));
-
-        counterName.focus();
-    }
-    addCounterAction("❤");
-    document.getElementById("addCounter").addEventListener("click", () => {
-        addCounterAction(getCounterName());
+        model.load(addCounterAction);
     });
-});
+})();
 </script>
 </head>
 <body>
