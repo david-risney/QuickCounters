@@ -1,0 +1,81 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dice</title>
+<style>
+@-ms-viewport { width: device-width; }
+
+html { 
+    font-family: sans-serif; 
+}
+
+button {
+    border: black 2px solid;
+    background-color: white;
+    border-radius: 10px;
+    width: 5em;
+    height: 4em;
+}
+</style>
+<script>
+(() => {
+    const dice = [];
+    const diceMap = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const diceSideBoard = document.getElementById("diceSideBoard");
+        const diceArea = document.getElementById("diceArea");
+        const diceDescription = document.getElementById("diceDescription");
+
+        function updateDiceDescription(sides) {
+            if (!diceMap[sides]) {
+                diceMap[sides] = 0;
+            }
+            diceMap[sides]++;
+
+            diceDescription.value = diceMap.
+                map((count, sides) => count + "D" + sides).
+                filter(part => part.length).
+                join(" ");
+        }
+
+        function addDieTypeToSideBoard(sides) {
+            const dieTypeButton = document.createElement("button");
+            dieTypeButton.textContent = "+D" + sides;
+            dieTypeButton.setAttribute("data-sides", sides);
+            dieTypeButton.addEventListener("click", () => {
+                function roll() {
+                    [50, 100, 200, 500, 1000].forEach(interval => setTimeout(() => {
+                        dieInstance.textContent = Math.floor(Math.random() * sides) + 1;
+                    }, interval));
+                }
+                const dieInstance = document.createElement("button");
+                dice.push(dieInstance);
+                dieInstance.textContent = "1";
+                dieInstance.addEventListener("click", roll);
+                diceArea.appendChild(dieInstance);
+                roll();
+
+                updateDiceDescription(sides);
+            });
+
+            diceSideBoard.appendChild(dieTypeButton);
+        }
+
+        [2, 4, 6, 10, 12, 20].forEach(addDieTypeToSideBoard);
+
+        document.getElementById("rollAll").addEventListener("click", () => {
+            dice.forEach(die => die.click());
+        });
+    });
+})();
+</script>
+</head>
+<body>
+<h1>Dice</h1>
+<div id="diceSideBoard"></div>
+<input id="diceDescription" type="text" value="" placeholder="Dice description e.g. '2D20 1D6'">
+<button id="rollAll">Roll All</button>
+<div id="diceArea"></div>
+</body>
+</html>
